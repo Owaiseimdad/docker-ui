@@ -1,103 +1,221 @@
-import Image from "next/image";
+'use client';
+import { useState } from 'react';
+import { useContainers, useContainerActions } from '@/hooks/useDocker';
+import Navbar from '@/components/Navbar';
+import StatsCard from '@/components/StatsCard';
+import ContainerCard from '@/components/ContainerCard';
+import ActionButton from '@/components/ActionButton';
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const { containers, runningCount, loading, error, refresh } = useContainers();
+  const { performAction, loading: actionLoading } = useContainerActions();
+  const [selectedContainers, setSelectedContainers] = useState<Set<string>>(new Set());
+  const [actioningContainer, setActioningContainer] = useState<string | null>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const handleContainerAction = async (containerId: string, action: 'start' | 'stop' | 'restart') => {
+    setActioningContainer(containerId);
+    try {
+      const result = await performAction(containerId, action);
+      if (result.success) {
+        refresh(); // Refresh container list
+      } else {
+        alert(result.error || `Failed to ${action} container`);
+      }
+    } finally {
+      setActioningContainer(null);
+    }
+  };
+
+  const handleBulkRestart = async () => {
+    if (selectedContainers.size === 0) return;
+
+    for (const containerId of selectedContainers) {
+      await handleContainerAction(containerId, 'restart');
+    }
+    setSelectedContainers(new Set());
+  };
+
+  const handleSelectAll = () => {
+    if (selectedContainers.size === containers.length) {
+      setSelectedContainers(new Set());
+    } else {
+      setSelectedContainers(new Set(containers.map(c => c.Id)));
+    }
+  };
+
+  const toggleContainer = (containerId: string) => {
+    const newSelected = new Set(selectedContainers);
+    if (newSelected.has(containerId)) {
+      newSelected.delete(containerId);
+    } else {
+      newSelected.add(containerId);
+    }
+    setSelectedContainers(newSelected);
+  };
+
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+          <div className="max-w-7xl mx-auto px-6 py-8">
+            <div className="animate-pulse">
+              <div className="h-10 bg-gray-200 rounded-lg w-1/4 mb-6"></div>
+              <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+                <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
+                <div className="h-12 bg-gray-200 rounded w-20"></div>
+              </div>
+              <div className="space-y-4">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="h-24 bg-white rounded-xl shadow-sm"></div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+          <div className="max-w-7xl mx-auto px-6 py-8">
+            <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-2xl p-8 shadow-lg">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                  <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-red-900 mb-1">Connection Error</h2>
+                  <p className="text-red-700">{error}</p>
+                </div>
+              </div>
+              <p className="text-red-600 mb-6">
+                Ensure Docker/Colima is running and accessible.
+              </p>
+              <button
+                onClick={refresh}
+                className="px-6 py-3 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              >
+                Retry Connection
+              </button>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="mb-8">
+            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 mb-8">
+              <div>
+                <h1 className="text-4xl font-bold text-gray-900 mb-2">Docker Containers</h1>
+                <p className="text-gray-600">Manage your Docker containers with ease</p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {containers.length > 0 && (
+                  <>
+                    <button
+                      onClick={handleSelectAll}
+                      className="px-4 py-2 bg-gray-600 text-white rounded-xl font-medium hover:bg-gray-700 transition-all duration-200 shadow-md hover:shadow-lg"
+                    >
+                      {selectedContainers.size === containers.length ? 'Deselect All' : 'Select All'}
+                    </button>
+                    {selectedContainers.size > 0 && (
+                      <button
+                        onClick={handleBulkRestart}
+                        disabled={actionLoading}
+                        className="px-4 py-2 bg-orange-600 text-white rounded-xl font-medium hover:bg-orange-700 disabled:opacity-50 transition-all duration-200 shadow-md hover:shadow-lg"
+                      >
+                        Restart Selected ({selectedContainers.size})
+                      </button>
+                    )}
+                  </>
+                )}
+                <button
+                  onClick={refresh}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                >
+                  Refresh
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <StatsCard
+                title="Running Containers"
+                value={runningCount}
+                bgColor="from-blue-500 to-blue-600"
+                icon={
+                  <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                }
+              />
+              <StatsCard
+                title="Total Containers"
+                value={containers.length}
+                bgColor="from-green-500 to-green-600"
+                icon={
+                  <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                }
+              />
+              <StatsCard
+                title="Selected"
+                value={selectedContainers.size}
+                bgColor="from-purple-500 to-purple-600"
+                icon={
+                  <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                  </svg>
+                }
+              />
+            </div>
+
+            {containers.length === 0 ? (
+              <div className="text-center py-20">
+                <div className="w-24 h-24 bg-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <svg className="w-16 h-16 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">No containers running</h3>
+                <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                  Start your first container to see it appear here. Try running:
+                </p>
+                <code className="bg-gray-900 text-green-400 px-6 py-3 rounded-xl font-mono text-sm">
+                  docker run -d nginx
+                </code>
+              </div>
+            ) : (
+              <div className="grid gap-6">
+                {containers.map((container) => (
+                  <ContainerCard
+                    key={container.Id}
+                    container={container}
+                    isSelected={selectedContainers.has(container.Id)}
+                    isActioning={actioningContainer === container.Id}
+                    onToggleSelect={toggleContainer}
+                    onAction={handleContainerAction}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
