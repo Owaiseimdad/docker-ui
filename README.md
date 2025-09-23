@@ -36,6 +36,11 @@ A modern, responsive web interface for managing Docker containers, images, and n
 <img width="2514" height="1600" alt="Screenshot 2025-09-19 at 2 07 11 PM" src="https://github.com/user-attachments/assets/6a79e54f-411e-4ae8-b409-5874f0df96b1" />
 
 
+https://github.com/user-attachments/assets/4cadaf53-74fd-4af3-b525-65ce95ebc3b5
+
+
+
+
 ## 🚀 Quick Start
 
 ### Prerequisites
