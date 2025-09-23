@@ -1,10 +1,9 @@
 'use client';
 import { useState } from 'react';
 import { useContainers, useContainerActions } from '@/hooks/useDocker';
-import Navbar from '@/components/Navbar';
 import StatsCard from '@/components/StatsCard';
 import ContainerCard from '@/components/ContainerCard';
-import ActionButton from '@/components/ActionButton';
+import HomebodySkeleton from '@/components/HomeBodySkeleton';
 
 export default function Home() {
   const { containers, runningCount, loading, error, refresh } = useContainers();
@@ -17,7 +16,7 @@ export default function Home() {
     try {
       const result = await performAction(containerId, action);
       if (result.success) {
-        refresh(); // Refresh container list
+        refresh();
       } else {
         alert(result.error || `Failed to ${action} container`);
       }
@@ -56,23 +55,7 @@ export default function Home() {
   if (loading) {
     return (
       <>
-        <Navbar />
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-          <div className="max-w-7xl mx-auto px-6 py-8">
-            <div className="animate-pulse">
-              <div className="h-10 bg-gray-200 rounded-lg w-1/4 mb-6"></div>
-              <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-                <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
-                <div className="h-12 bg-gray-200 rounded w-20"></div>
-              </div>
-              <div className="space-y-4">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="h-24 bg-white rounded-xl shadow-sm"></div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
+        <HomebodySkeleton />
       </>
     );
   }
@@ -80,7 +63,6 @@ export default function Home() {
   if (error) {
     return (
       <>
-        <Navbar />
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
           <div className="max-w-7xl mx-auto px-6 py-8">
             <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-2xl p-8 shadow-lg">
@@ -113,7 +95,6 @@ export default function Home() {
 
   return (
     <>
-      <Navbar />
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="mb-8">

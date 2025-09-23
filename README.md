@@ -33,7 +33,6 @@ A modern, responsive web interface for managing Docker containers, images, and n
 
 ## 🖥️ Screenshots
 
-*Add screenshots of your application here when ready*
 
 ## 🚀 Quick Start
 
@@ -399,7 +398,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support & Community
 
-- **Issues**: [GitHub Issues](https://github.com/Owaiseimdad/docker-online-ui/issues)
+- **Issues**: [GitHub Issues](https://github.com/Owaiseimdad/docker-ui/issues)
 
 ---
 

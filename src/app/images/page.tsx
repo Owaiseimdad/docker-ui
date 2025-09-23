@@ -1,6 +1,5 @@
 'use client';
 import { useState } from 'react';
-import Navbar from '@/components/Navbar';
 import StatsCard from '@/components/StatsCard';
 import ImageCard from '@/components/ImageCard';
 import ActionButton from '@/components/ActionButton';
@@ -62,7 +61,6 @@ export default function ImagesPage() {
   if (loading) {
     return (
       <>
-        <Navbar />
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
           <div className="max-w-7xl mx-auto px-6 py-8">
             <div className="animate-pulse">
@@ -87,7 +85,6 @@ export default function ImagesPage() {
   if (error) {
     return (
       <>
-        <Navbar />
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
           <div className="max-w-7xl mx-auto px-6 py-8">
             <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-2xl p-8 shadow-lg">
@@ -114,7 +111,6 @@ export default function ImagesPage() {
 
   return (
     <>
-      <Navbar />
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="mb-8">
