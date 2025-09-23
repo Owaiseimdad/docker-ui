@@ -156,6 +156,24 @@ class NetworkService {
       };
     }
   }
+
+  async getProviderDetails(providerName: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/validate-provider`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ provider: providerName }),
+      });
+
+      const result = await response.json();
+      return result.valid;
+    } catch (error) {
+      console.error("Provider validation error:", error);
+      return false;
+    }
+  }
 }
 
 export const networkService = new NetworkService();
